@@ -16,8 +16,6 @@ def yint(p1, p2, x, y3, y4):
     x2, y2 = p2
     x3 = x
     x4 = x
-    print("p1:",p1)
-    print("p2:",p2)
     px = ((x1*y2 - y1*x2) * (x3 - x4) - (x1 - x2)*(x3*y4 - y3*x4)) / \
              float((x1 - x2)*(y3 - y4) - (y1 - y2)*(x3 - x4))
     py = ((x1*y2 - y1*x2)*(y3-y4) - (y1 - y2)*(x3*y4 - y3*x4)) / \
@@ -99,21 +97,17 @@ def findMin(l):
             idx = i
     return min_x, idx_x 
 
-def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x, y1, y2, y3, y4):
+def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
     
     y1 = yint(lCurr, rNext, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
     y2 = yint(lCurr, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
     y3 = yint(lNext, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
-    y4 = yint(lCurr, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
-    
+    return y1[1], y2[1], y3[1] 
 
 def merge(left, right):
     
     clockwiseSort(left)
     clockwiseSort(right)
-    print("cw->left:",left) 
-    print("cw->right:",right)
-    y1 = y2 = y3 = y4 = -1
 
     # find top connector
     lCurr, lidx = findMax(left)
@@ -121,10 +115,14 @@ def merge(left, right):
     divider_x = int((lCurr[0] + rCurr[0]) / 2)
     rNext = right[(ridx + 1) % len(right)]
     lNext = left[(lidx - 1) % len(left)] 
-    initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x, y1, y2, y3, y4)
- 
-    while y1 > y2 or y3 > y4:
-        if y1 > y2:
+    y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
+    
+    # while 
+    #   y(lCurr, rNext) > y(lCurr, rCurr) or
+    #   y(lNext, rCurr) > y(lCurr, rCurr)
+    while y1 < y2 or y3 < y2:
+        print(y1)
+        if y1 < y2:
             ridx = (ridx + 1) % len(right)
             rCurr = right[ridx]
             rNext = right[(ridx + 1) % len(right)]
@@ -132,7 +130,7 @@ def merge(left, right):
             lidx = (lidx - 1) % len(left)
             lCurr = left[lidx]
             lNext = left[(lidx - 1) % len(left)]
-        initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x, y1, y2, y3, y4)
+        y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
    
     
     hullTop_idx = (lidx, ridx)
@@ -143,20 +141,21 @@ def merge(left, right):
     divider_x = (lCurr[0] + rCurr[0]) / 2
     rNext = right[(ridx + 1) % len(right)]
     lNext = left[(lidx - 1) % len(left)] 
-    initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x, y1, y2, y3, y4)
+    y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
 
     
-    while y1 < y2 or y3 < y4:
-        if y1 < y2:
+    while y1 > y2 or y3 > y2:
+        if y1 > y2:
             ridx = (ridx - 1) % len(right)
-            rCurr = right[lidx]
+            rCurr = right[ridx]
             rNext = right[(ridx - 1) % len(right)]
         else:
             lidx = (lidx + 1) % len(left)
-            lCurr = left[ridx]
+            lCurr = left[lidx]
             lNext = left[(lidx + 1) % len(left)]         
-        initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x, y1, y2, y3, y4)
-       
+        y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
+    
+
     hullBot_idx = (lidx, ridx)
     i = hullBot_idx[0]
     newHull = []
@@ -165,14 +164,10 @@ def merge(left, right):
         i = (i + 1) % len(left)
 
     i = hullTop_idx[1]
-    
     while (i != hullBot_idx[1]):
         newHull.append(right[i])
         i = (i + 1) % len(right)
     
-    print("top:", hullTop_idx)
-    print("bot:", hullBot_idx)
-    print("newHull:", newHull)
     return newHull
 
 '''
@@ -180,7 +175,6 @@ if there is not enough points for divide and conquer algorithm
 use brute force to find convex convex hull 
 '''
 def naiveComputeHull(points):
-    
     hullSet = set()
     for i in range(0, len(points)-1):
         for j in range(i+1, len(points)):
@@ -239,21 +233,16 @@ def divide(points):
     for i in range(half, len(points)):
         right.append(points[i])
 
-    print(left)
-    print(right)
-
     left = divide(left)
     right = divide(right)
     return merge(left, right)
 
 def computeHull(points):
     global DIVIDER_Y
-    yMin = min(points, key = lambda x: x[1])
     yMax = max(points, key = lambda x: x[1])
-    DIVIDER_Y = (yMin[1], yMax[1])
+    DIVIDER_Y = (0, yMax[1])
     points = sortByXCoord(points)
     hull = divide(points)
-    print(hull)
     return hull
 
 
