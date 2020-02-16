@@ -105,7 +105,8 @@ def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
     return y1[1], y2[1], y3[1] 
 
 def merge(left, right):
-    
+    print("left:",left)
+    print("right:",right)
     clockwiseSort(left)
     clockwiseSort(right)
 
@@ -116,11 +117,13 @@ def merge(left, right):
     rNext = right[(ridx + 1) % len(right)]
     lNext = left[(lidx - 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-    
+    print("start left:", lCurr) 
+    print("start right:", rCurr)
     # while 
     #   y(lCurr, rNext) > y(lCurr, rCurr) or
     #   y(lNext, rCurr) > y(lCurr, rCurr)
     while y1 < y2 or y3 < y2:
+        print("top")
         if y1 < y2:
             ridx = (ridx + 1) % len(right)
             rCurr = right[ridx]
@@ -143,6 +146,7 @@ def merge(left, right):
 
     
     while y1 > y2 or y3 > y2:
+        print("bot")
         if y1 > y2:
             ridx = (ridx - 1) % len(right)
             rCurr = right[ridx]
