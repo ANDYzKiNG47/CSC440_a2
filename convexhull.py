@@ -79,9 +79,30 @@ def sortByXCoord(points):
     points.sort(key = lambda x: x[0])
     return points
 
+def getMin(points):
+    min_x = points[0]
+    idx = 0
+    for i in range(1,len(points)):
+        if points[i][0] < min_x[0]:
+            min_x = points[i]
+            idx = i
+    return min_x, idx
+
+def getMax(points):
+    max_x = points[0]
+    idx = 0
+    for i in range(1,len(points)):
+        if points[i][0] > max_x[0]:
+            max_x = points[i]
+            idx = i
+    return max_x, idx
 
 def merge(left, right):
-    return left + right
+    
+    clockwiseSort(left)
+    clockwiseSort(right)
+
+
 
 '''
 if there is not enough points for divide and conquer algorithm
