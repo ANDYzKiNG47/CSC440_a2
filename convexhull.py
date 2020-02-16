@@ -104,6 +104,8 @@ def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
     y3 = yint(lNext, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
     return y1[1], y2[1], y3[1] 
 
+
+'''
 def merge(left, right):
     
     clockwiseSort(left)
@@ -121,7 +123,6 @@ def merge(left, right):
     #   y(lCurr, rNext) > y(lCurr, rCurr) or
     #   y(lNext, rCurr) > y(lCurr, rCurr)
     while y1 < y2 or y3 < y2:
-        print(y1)
         if y1 < y2:
             ridx = (ridx + 1) % len(right)
             rCurr = right[ridx]
@@ -138,9 +139,9 @@ def merge(left, right):
     # find bottom connector
     lCurr, lidx = findMax(left)
     rCurr, ridx = findMin(right)
-    divider_x = (lCurr[0] + rCurr[0]) / 2
-    rNext = right[(ridx + 1) % len(right)]
-    lNext = left[(lidx - 1) % len(left)] 
+    divider_x = int((lCurr[0] + rCurr[0]) / 2)
+    rNext = right[(ridx - 1) % len(right)]
+    lNext = left[(lidx + 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
 
     
@@ -169,6 +170,10 @@ def merge(left, right):
         i = (i + 1) % len(right)
     
     return newHull
+'''
+
+def merge(left, right):
+    return left + right
 
 '''
 if there is not enough points for divide and conquer algorithm
@@ -219,6 +224,7 @@ Replace the implementation of computeHull with a correct computation
 of the convex hull using the divide-and-conquer algorithm
 '''
 def divide(points):
+    print(points)
     if (len(points) <= 6):
         points = naiveComputeHull(points)
         return points
@@ -226,7 +232,6 @@ def divide(points):
     left = []
     right = []
     half = math.floor(len(points)/2)
-
     for i in range(0, half):
         left.append(points[i])
 
@@ -242,7 +247,9 @@ def computeHull(points):
     yMax = max(points, key = lambda x: x[1])
     DIVIDER_Y = (0, yMax[1])
     points = sortByXCoord(points)
+    print(len(points))
     hull = divide(points)
+    print(len(points))
     return hull
 
 
