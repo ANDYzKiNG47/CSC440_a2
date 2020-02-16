@@ -99,9 +99,13 @@ def getMax(points):
 
 def merge(left, right):
     
+    startLeft, startLeftIdx = getMax(left)
+    startRight, startRightIdx = getMin(right)
+
     clockwiseSort(left)
     clockwiseSort(right)
-
+    
+    
 
 
 '''
