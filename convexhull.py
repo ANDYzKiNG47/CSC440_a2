@@ -93,7 +93,7 @@ def findMin(l):
     idx_x = 0
     for i in range(1, len(l)):
         if l[i][0] < min_x[0]:
-            minx_x = l[i]
+            min_x = l[i]
             idx = i
     return min_x, idx_x 
 
