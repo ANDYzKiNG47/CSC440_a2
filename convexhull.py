@@ -121,7 +121,6 @@ def merge(left, right):
     #   y(lCurr, rNext) > y(lCurr, rCurr) or
     #   y(lNext, rCurr) > y(lCurr, rCurr)
     while y1 < y2 or y3 < y2:
-        print(y1)
         if y1 < y2:
             ridx = (ridx + 1) % len(right)
             rCurr = right[ridx]
@@ -138,9 +137,8 @@ def merge(left, right):
     # find bottom connector
     lCurr, lidx = findMax(left)
     rCurr, ridx = findMin(right)
-    divider_x = (lCurr[0] + rCurr[0]) / 2
-    rNext = right[(ridx + 1) % len(right)]
-    lNext = left[(lidx - 1) % len(left)] 
+    rNext = right[(ridx - 1) % len(right)]
+    lNext = left[(lidx + 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
 
     
@@ -168,6 +166,7 @@ def merge(left, right):
         newHull.append(right[i])
         i = (i + 1) % len(right)
     
+    clockwiseSort(newHull)    
     return newHull
 
 '''
