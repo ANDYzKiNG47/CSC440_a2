@@ -79,98 +79,6 @@ def sortByXCoord(points):
     points.sort(key = lambda x: x[0])
     return points
 
-def findMax(l):
-    max_x = l[0]
-    idx_x = 0
-    for i in range(1, len(l)):
-        if l[i][0] > max_x[0]:
-            max_x = l[i]
-            idx_x = i
-    return max_x, idx_x 
-
-def findMin(l):
-    min_x = l[0]
-    idx_x = 0
-    for i in range(1, len(l)):
-        if l[i][0] < min_x[0]:
-            minx_x = l[i]
-            idx = i
-    return min_x, idx_x 
-
-def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
-    
-    y1 = yint(lCurr, rNext, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
-    y2 = yint(lCurr, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
-    y3 = yint(lNext, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
-    return y1[1], y2[1], y3[1] 
-
-
-'''
-def merge(left, right):
-    
-    clockwiseSort(left)
-    clockwiseSort(right)
-
-    # find top connector
-    lCurr, lidx = findMax(left)
-    rCurr, ridx = findMin(right)
-    divider_x = int((lCurr[0] + rCurr[0]) / 2)
-    rNext = right[(ridx + 1) % len(right)]
-    lNext = left[(lidx - 1) % len(left)] 
-    y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-    
-    # while 
-    #   y(lCurr, rNext) > y(lCurr, rCurr) or
-    #   y(lNext, rCurr) > y(lCurr, rCurr)
-    while y1 < y2 or y3 < y2:
-        if y1 < y2:
-            ridx = (ridx + 1) % len(right)
-            rCurr = right[ridx]
-            rNext = right[(ridx + 1) % len(right)]
-        else:
-            lidx = (lidx - 1) % len(left)
-            lCurr = left[lidx]
-            lNext = left[(lidx - 1) % len(left)]
-        y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-   
-    
-    hullTop_idx = (lidx, ridx)
-    
-    # find bottom connector
-    lCurr, lidx = findMax(left)
-    rCurr, ridx = findMin(right)
-    divider_x = int((lCurr[0] + rCurr[0]) / 2)
-    rNext = right[(ridx - 1) % len(right)]
-    lNext = left[(lidx + 1) % len(left)] 
-    y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-
-    
-    while y1 > y2 or y3 > y2:
-        if y1 > y2:
-            ridx = (ridx - 1) % len(right)
-            rCurr = right[ridx]
-            rNext = right[(ridx - 1) % len(right)]
-        else:
-            lidx = (lidx + 1) % len(left)
-            lCurr = left[lidx]
-            lNext = left[(lidx + 1) % len(left)]         
-        y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-    
-
-    hullBot_idx = (lidx, ridx)
-    i = hullBot_idx[0]
-    newHull = []
-    while (i != hullTop_idx[0]):
-        newHull.append(left[i])
-        i = (i + 1) % len(left)
-
-    i = hullTop_idx[1]
-    while (i != hullBot_idx[1]):
-        newHull.append(right[i])
-        i = (i + 1) % len(right)
-    
-    return newHull
-'''
 
 def merge(left, right):
     return left + right
@@ -247,9 +155,7 @@ def computeHull(points):
     yMax = max(points, key = lambda x: x[1])
     DIVIDER_Y = (0, yMax[1])
     points = sortByXCoord(points)
-    print(len(points))
     hull = divide(points)
-    print(len(points))
     return hull
 
 
