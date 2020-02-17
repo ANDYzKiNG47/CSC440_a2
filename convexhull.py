@@ -94,7 +94,7 @@ def findMin(l):
     for i in range(1, len(l)):
         if l[i][0] < min_x[0]:
             min_x = l[i]
-            idx = i
+            idx_x = i
     return min_x, idx_x 
 
 def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
@@ -105,9 +105,24 @@ def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
     return y1[1], y2[1], y3[1] 
 
 def rotate(points, idx, currPoint, nextPoint, direction):
-    idx = (idx + direction) % len(points)
+    if (idx + direction) == len(points):
+        idx = 0
+    elif (idx + direction) < 0:
+        idx = len(points) - 1
+    else:
+        idx += direction
+
     currPoint = points[idx]
-    nextPoint = points[(idx + direction) % len(points)]
+    
+    nidx = None
+    if (idx + direction) == len(points):
+        nidx = 0
+    elif (idx + direction) < 0:
+        nidx = len(points) - 1
+    else:
+        nidx = idx+direction
+
+    nextPoint = points[nidx]
     return idx, currPoint, nextPoint 
 
 def merge(left, right):
@@ -124,25 +139,20 @@ def merge(left, right):
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
     print("start left", lCurr)
     print("start right", rCurr)
+    print("ridx:", ridx)
+    print("lidx:", lidx)
     # while 
     #   y(lCurr, rNext) > y(lCurr, rCurr) or
     #   y(lNext, rCurr) > y(lCurr, rCurr)
     while y1 < y2 or y3 < y2:
+        print("rNext:", rNext)
+        print("lNext:", lNext)
         if y1 < y2:
             #rotate right cw
             ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, 1)
-            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-            # if new intercept is worse than old, switch back
-            if new_y2 > y2:
-                # rotate right ccw
-                ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, -1)
         else:
             # rotate left ccw
             lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, -1)
-            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-            # if new intercept is worse than old, switch back
-            if new_y2 > y2:
-                lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, 1)
 
         y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
    
@@ -160,14 +170,8 @@ def merge(left, right):
     while y1 > y2 or y3 > y2:
         if y1 > y2:
             ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, -1)
-            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-            if new_y2 < y2:
-                ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, 1)
         else:
             lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, 1)
-            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-            if new_y2 < y2:
-                lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, -1)
 
         y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
     
