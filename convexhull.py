@@ -104,12 +104,17 @@ def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
     y3 = yint(lNext, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
     return y1[1], y2[1], y3[1] 
 
+def rotate(points, idx, currPoint, nextPoint, direction):
+    idx = (idx + direction) % len(points)
+    currPoint = points[idx]
+    nextPoint = points[(idx + direction) % len(points)]
+    return idx, currPoint, nextPoint 
+
 def merge(left, right):
-    print("left:",left)
-    print("right:",right)
     clockwiseSort(left)
     clockwiseSort(right)
-
+    print("original left", left)
+    print("original right", right)
     # find top connector
     lCurr, lidx = findMax(left)
     rCurr, ridx = findMin(right)
@@ -117,26 +122,33 @@ def merge(left, right):
     rNext = right[(ridx + 1) % len(right)]
     lNext = left[(lidx - 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-    print("start left:", lCurr) 
-    print("start right:", rCurr)
+    print("start left", lCurr)
+    print("start right", rCurr)
     # while 
     #   y(lCurr, rNext) > y(lCurr, rCurr) or
     #   y(lNext, rCurr) > y(lCurr, rCurr)
     while y1 < y2 or y3 < y2:
-        print("top")
         if y1 < y2:
-            ridx = (ridx + 1) % len(right)
-            rCurr = right[ridx]
-            rNext = right[(ridx + 1) % len(right)]
+            #rotate right cw
+            ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, 1)
+            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
+            # if new intercept is worse than old, switch back
+            if new_y2 > y2:
+                # rotate right ccw
+                ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, -1)
         else:
-            lidx = (lidx - 1) % len(left)
-            lCurr = left[lidx]
-            lNext = left[(lidx - 1) % len(left)]
+            # rotate left ccw
+            lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, -1)
+            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
+            # if new intercept is worse than old, switch back
+            if new_y2 > y2:
+                lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, 1)
+
         y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
    
     
     hullTop_idx = (lidx, ridx)
-    
+    print("hull top", hullTop_idx) 
     # find bottom connector
     lCurr, lidx = findMax(left)
     rCurr, ridx = findMin(right)
@@ -146,19 +158,22 @@ def merge(left, right):
 
     
     while y1 > y2 or y3 > y2:
-        print("bot")
         if y1 > y2:
-            ridx = (ridx - 1) % len(right)
-            rCurr = right[ridx]
-            rNext = right[(ridx - 1) % len(right)]
+            ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, -1)
+            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
+            if new_y2 < y2:
+                ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, 1)
         else:
-            lidx = (lidx + 1) % len(left)
-            lCurr = left[lidx]
-            lNext = left[(lidx + 1) % len(left)]         
+            lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, 1)
+            new_y1, new_y2, new_y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
+            if new_y2 < y2:
+                lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, -1)
+
         y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
     
 
     hullBot_idx = (lidx, ridx)
+    print("hull bot", hullBot_idx)
     i = hullBot_idx[0]
     newHull = []
     while (i != hullTop_idx[0]):
@@ -170,7 +185,7 @@ def merge(left, right):
         newHull.append(right[i])
         i = (i + 1) % len(right)
     
-    clockwiseSort(newHull)    
+    clockwiseSort(newHull)
     return newHull
 
 '''
