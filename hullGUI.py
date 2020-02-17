@@ -3,7 +3,11 @@
 # from Tkinter import *
 from tkinter import *
 import copy
+import time
 from convexhull import computeHull
+from hypothesis import given
+import hypothesis
+import hypothesis.strategies as st 
 
 
 def hello(event):
@@ -14,17 +18,27 @@ def addPoint(event):
     points.append((event.x,event.y))
 
 def drawPoint(canvas,x,y):
-    # r = 4
-    # id = canvas.create_oval(x-r,y-r,x+r,y+r)
+    r = 4
+    id = canvas.create_oval(x-r,y-r,x+r,y+r)
     #id = canvas.create_image((x,y),image=ram,state=NORMAL)
-    coord = '(' + str(x) + ', ' + str(y) + ')'
-    id = canvas.create_text(x, y, fill="white", font="Times 10", text=coord)
+    #coord = '(' + str(x) + ', ' + str(y) + ')'
+    #id = canvas.create_text(x, y, fill="white", font="Times 10", text=coord)
     return id
 
 def showPoints(event):
     print(points)
 
-def drawHull():
+@hypothesis.seed(420694747)
+@given(
+    st.lists(st.tuples(st.integers(0,1000),
+        st.integers(0,800)), 3, None, None, True)
+)
+def drawHull(points):
+    w.delete('all')
+    for p in points:
+        drawPoint(w, p[0], p[1])
+    
+    hull = []
     hull = copy.copy(computeHull(points))
     hull.append(hull[0])
     for i in range(0,len(hull)-1):
@@ -33,6 +47,7 @@ def drawHull():
         x2 = hull[i+1][0]
         y2 = hull[i+1][1]
         w.create_line(x1, y1, x2, y2, width=3)
+    w.update()
 
 
 master = Tk()

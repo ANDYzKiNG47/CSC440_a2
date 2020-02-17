@@ -1,7 +1,31 @@
 import math
 import sys
+from hypothesis import given
+import hypothesis.strategies as st 
+import time
 
 EPSILON = sys.float_info.epsilon
+
+
+
+def checkHull(hull, points):
+    for i in range(0, len(hull) - 2):
+        j = i + 1
+        p = hull[i]
+        q = hull[j]
+        pos = 0
+        neg = 0
+        for r in points:
+            if r==p or r == q: continue
+            if cw(p,q,r):
+                neg += 1
+            elif ccw(p,q,r):
+                pos += 1
+        if (pos == 0 or neg == 0):
+            return True
+        else:
+            return False
+
 
 '''
 Given two points, p1 and p2,
@@ -79,6 +103,10 @@ def sortByXCoord(points):
     points.sort(key = lambda x: x[0])
     return points
 
+'''
+finds the point with the largest x value
+returns the point and index
+'''
 def findMax(l):
     max_x = l[0]
     idx_x = 0
@@ -88,6 +116,10 @@ def findMax(l):
             idx_x = i
     return max_x, idx_x 
 
+'''
+finds the point with the smallest x value 
+returns the point and index
+'''
 def findMin(l):
     min_x = l[0]
     idx_x = 0
@@ -97,57 +129,57 @@ def findMin(l):
             idx_x = i
     return min_x, idx_x 
 
+'''
+returns the y intercepts of
+y1: Current left point and next right
+y2: 
+'''
 def initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x):
     
+    y1 = y2 = y3 = (0,0)
+    if lCurr[1] == rNext[1]:
+        y1 = (divider_x, lCurr[1])
+    else:
+        y1 = yint(lCurr, rNext, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])   
+    
+    if lCurr[1] == rCurr[1]:
+        y2 = (divider_x, lCurr[1])
+    else:
+        y2 = yint(lCurr, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
+    
+    if lNext[1] == rCurr[1]:
+        y3 = (divider_x, rCurr[1])
+    else:
+        y3 = yint(lNext, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
+    '''     
     y1 = yint(lCurr, rNext, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
     y2 = yint(lCurr, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
     y3 = yint(lNext, rCurr, divider_x, DIVIDER_Y[0], DIVIDER_Y[1])
+    '''
     return y1[1], y2[1], y3[1] 
 
 def rotate(points, idx, currPoint, nextPoint, direction):
-    if (idx + direction) == len(points):
-        idx = 0
-    elif (idx + direction) < 0:
-        idx = len(points) - 1
-    else:
-        idx += direction
 
+    idx = (idx + direction) % len(points)
     currPoint = points[idx]
-    
-    nidx = None
-    if (idx + direction) == len(points):
-        nidx = 0
-    elif (idx + direction) < 0:
-        nidx = len(points) - 1
-    else:
-        nidx = idx+direction
-
-    nextPoint = points[nidx]
+    nextPoint = points[(idx + direction) % len(points)]
     return idx, currPoint, nextPoint 
 
 def merge(left, right):
     clockwiseSort(left)
     clockwiseSort(right)
-    print("original left", left)
-    print("original right", right)
     # find top connector
     lCurr, lidx = findMax(left)
     rCurr, ridx = findMin(right)
-    divider_x = int((lCurr[0] + rCurr[0]) / 2)
+    divider_x = (lCurr[0] + rCurr[0]) / 2
     rNext = right[(ridx + 1) % len(right)]
     lNext = left[(lidx - 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-    print("start left", lCurr)
-    print("start right", rCurr)
-    print("ridx:", ridx)
-    print("lidx:", lidx)
     # while 
     #   y(lCurr, rNext) > y(lCurr, rCurr) or
     #   y(lNext, rCurr) > y(lCurr, rCurr)
-    while y1 < y2 or y3 < y2:
-        print("rNext:", rNext)
-        print("lNext:", lNext)
-        if y1 < y2:
+    while y1 <= y2 or y3 <= y2:
+        if y1 <= y2:
             #rotate right cw
             ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, 1)
         else:
@@ -158,7 +190,6 @@ def merge(left, right):
    
     
     hullTop_idx = (lidx, ridx)
-    print("hull top", hullTop_idx) 
     # find bottom connector
     lCurr, lidx = findMax(left)
     rCurr, ridx = findMin(right)
@@ -166,29 +197,31 @@ def merge(left, right):
     lNext = left[(lidx + 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
 
-    
-    while y1 > y2 or y3 > y2:
-        if y1 > y2:
+    while y1 >= y2 or y3 >= y2:
+        if y1 >= y2:
+            #rotate right ccw
             ridx, rCurr, rNext = rotate(right, ridx, rCurr, rNext, -1)
         else:
+            #rotate left cw
             lidx, lCurr, lNext = rotate(left, lidx, lCurr, lNext, 1)
 
         y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
     
 
     hullBot_idx = (lidx, ridx)
-    print("hull bot", hullBot_idx)
     i = hullBot_idx[0]
     newHull = []
     while (i != hullTop_idx[0]):
         newHull.append(left[i])
         i = (i + 1) % len(left)
-
+    newHull.append(left[hullTop_idx[0]])
+    
     i = hullTop_idx[1]
     while (i != hullBot_idx[1]):
         newHull.append(right[i])
         i = (i + 1) % len(right)
-    
+    newHull.append(right[hullBot_idx[1]])  
+
     clockwiseSort(newHull)
     return newHull
 
@@ -227,7 +260,7 @@ def checkSide(p1_idx, p2_idx, points):
             (p[1] - point1[1]) * (point2[0] - point1[0])
         
         # first point tested
-        if test == None:
+        if test == None or test == 0:
             test = d
         
         # check if on same line
@@ -241,20 +274,26 @@ Replace the implementation of computeHull with a correct computation
 of the convex hull using the divide-and-conquer algorithm
 '''
 def divide(points):
-    if (len(points) <= 6):
-        points = naiveComputeHull(points)
-        return points
     
     left = []
     right = []
     half = math.floor(len(points)/2)
+    while(half < len(points)):
+        if points[half-1][0] == points[half][0]:
+            half += 1
+        else:
+            break
+
+    if (len(points) <= 12) or ((len(points) - half) <= 6):
+        points = naiveComputeHull(points)
+        return points
 
     for i in range(0, half):
         left.append(points[i])
 
     for i in range(half, len(points)):
         right.append(points[i])
-
+    
     left = divide(left)
     right = divide(right)
     return merge(left, right)
@@ -264,7 +303,12 @@ def computeHull(points):
     yMax = max(points, key = lambda x: x[1])
     DIVIDER_Y = (0, yMax[1])
     points = sortByXCoord(points)
+
+    s = time.time()
     hull = divide(points)
+    e = time.time()
+    print(e-s)
+    #assert checkHull(hull, points)
     return hull
 
 
