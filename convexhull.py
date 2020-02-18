@@ -175,9 +175,11 @@ def merge(left, right):
     rNext = right[(ridx + 1) % len(right)]
     lNext = left[(lidx - 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-    # while 
     #   y(lCurr, rNext) > y(lCurr, rCurr) or
     #   y(lNext, rCurr) > y(lCurr, rCurr)
+    # invariant: while this loop is executing there is a point at the y intercept between the
+    # current left and the next right or the current right and next left that is equal to or 
+    # "higher" than the intercept between the current left and the current right 
     while y1 <= y2 or y3 <= y2:
         if y1 <= y2:
             #rotate right cw
@@ -196,7 +198,9 @@ def merge(left, right):
     rNext = right[(ridx - 1) % len(right)]
     lNext = left[(lidx + 1) % len(left)] 
     y1, y2, y3 = initYVals(lCurr, lNext, lidx, rCurr, rNext, ridx, divider_x)
-
+    # invariant: while this loop is executing there is a point at the y intercept between the
+    # current left and the next right or the current right and the next left that is equal to
+    # or "lower than the intercept between the current left and the current right
     while y1 >= y2 or y3 >= y2:
         if y1 >= y2:
             #rotate right ccw
@@ -231,6 +235,8 @@ use brute force to find convex convex hull
 '''
 def naiveComputeHull(points):
     hullSet = set()
+    # invariant: every point to the left of i has been been paired with 
+    # with every other point and passed to checkSide()
     for i in range(0, len(points)-1):
         for j in range(i+1, len(points)):
             if checkSide(i, j, points):
@@ -251,6 +257,8 @@ def checkSide(p1_idx, p2_idx, points):
     test = None
     point1 = points[p1_idx]
     point2 = points[p2_idx]
+    # invariant: while this loop is executing, every point that has been checked
+    # lies on the same side of the given line segment
     for i in range(len(points)):
         if (i == p1_idx or i == p2_idx):
             continue
@@ -278,6 +286,8 @@ def divide(points):
     left = []
     right = []
     half = math.floor(len(points)/2)
+    # invariant: while this loop is executing the point at index half
+    # has the same x value as the point before it in the array
     while(half < len(points)):
         if points[half-1][0] == points[half][0]:
             half += 1
@@ -287,7 +297,8 @@ def divide(points):
     if (len(points) <= 12) or ((len(points) - half) <= 6):
         points = naiveComputeHull(points)
         return points
-
+    
+    # invariant: every element to the left of i has been added to 
     for i in range(0, half):
         left.append(points[i])
 
@@ -302,12 +313,12 @@ def computeHull(points):
     global DIVIDER_Y
     yMax = max(points, key = lambda x: x[1])
     DIVIDER_Y = (0, yMax[1])
-    points = sortByXCoord(points)
-
-    s = time.time()
+    #points = sortByXCoord(points)
+    #hull = naiveComputeHull(points)
+    #s = time.time()
     hull = divide(points)
-    e = time.time()
-    print(e-s)
+    #e = time.time()
+    #print(e-s)
     #assert checkHull(hull, points)
     return hull
 
